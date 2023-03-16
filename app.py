@@ -3,7 +3,7 @@ import os
 import datetime
 import flask
 # from flask.ext.session import Session
-from flask_session import Session
+# from flask_session import Session
 from flask import Flask, flash, g, jsonify, redirect, render_template, request, session
 from flask_cors import CORS, cross_origin
 from flask_login import current_user, login_required, login_user, logout_user
@@ -24,7 +24,7 @@ app.config['SESSION_TYPE'] = 'filesystem'
 # app.config['SESSION_FILE_DIR'] = os.path.abspath('/Users/edmondmbadu/repo/starlight/starlight-backend/')
 # /Users/edmondmbadu/repo/starlight/starlight-backend
 app.permanent_session_lifetime = datetime.timedelta(minutes=30)
-Session(app)
+# Session(app)
 CORS(app, supports_credentials=True)
 # CORS(app, resources={r"/api/*": {"origins": "http://localhost:4200"}})
 
