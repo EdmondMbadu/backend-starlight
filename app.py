@@ -136,6 +136,7 @@ def reset_password():
 
 ################ USER MODEL RELATED ROUTES ###############
 @app.route('/api/current_user')
+@cross_origin(supports_credentials=True)
 def get_current_user_info():
     user = get_current_user()
     if user:
