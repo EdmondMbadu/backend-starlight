@@ -15,6 +15,8 @@ app.config['SECRET_KEY'] = 'xyz##s3crwtK*'
 app.config['JWT_SECRET_KEY'] = 's3cr3!#&7-21jhF'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///starlight.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
 
 
 Session(app)
