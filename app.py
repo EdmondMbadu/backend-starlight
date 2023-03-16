@@ -9,7 +9,7 @@ from flask_jwt_extended import JWTManager, create_access_token
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-app = Flask(__name__) # name for the Flask app (refer to output)
+app = Flask(__name__)  # name for the Flask app (refer to output)
 app.config['SECRET_KEY'] = 'xyz##s3crwtK*'
 app.config['JWT_SECRET_KEY'] = 's3cr3!#&7-21jhF'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///starlight.db'
@@ -28,11 +28,14 @@ login.init_app(app)
 def create_table():
     db.create_all()
 
+
 def get_current_user_id():
     return session.get('user_id')
 
+
 def get_data():
     return request.get_json()
+
 
 def get_current_user():
     user_id = get_current_user_id()
@@ -40,6 +43,8 @@ def get_current_user():
     return user
 
 ################ AUTHENTICATION ROUTES ###############
+
+
 @app.route('/api/login', methods=['POST'])
 def login():
     data = get_data()
@@ -52,6 +57,11 @@ def login():
         return jsonify({'message': 'Login is successfull', 'token': access_token}), 200
     else:
         return jsonify({'error': 'Invalid email or password.'}), 401
+
+
+@app.route('/')
+def home():
+    return "Dummy text"
 
 
 @app.route('/api/register', methods=['POST'])
@@ -93,15 +103,15 @@ def forgot_password():
     email = data['email']
     if email is None:
         return jsonify({'error': 'Email is required'}), 400
-    
+
     user = UserModel.query.filter_by(email=email).first()
     if user:
         user_id = user.id
         return jsonify({'user_id': user_id}), 200
     else:
         return jsonify({'error': 'Invalid email address'}), 404
-    
-    
+
+
 @app.route('/api/reset_password', methods=['POST'])
 def reset_password():
     data = get_data()
@@ -109,7 +119,7 @@ def reset_password():
     user = UserModel.query.filter_by(id=user_id).first()
     if user is None:
         return jsonify({'error': 'User not found based on given id'}), 404
-    
+
     new_password = data['new_password']
     confirm_password = data['confirm_password']
 
@@ -121,7 +131,7 @@ def reset_password():
         return jsonify({'message': 'Password updated successfully'}), 200
 
 
-################ USER MODEL RELATED ROUTES ###############  
+################ USER MODEL RELATED ROUTES ###############
 @app.route('/api/current_user')
 def get_current_user_info():
     user = get_current_user()
@@ -133,10 +143,10 @@ def get_current_user_info():
 
 @app.route('/api/update-profile', methods=['PUT'])
 def update_profile():
-    user = get_current_user()    
+    user = get_current_user()
     if user is None:
         return jsonify({'error': 'User not found'}), 404
-    
+
     data = get_data()
     first = data['first']
     last = data['last']
@@ -148,23 +158,23 @@ def update_profile():
     else:
         if first == user.first and last == user.last:
             return jsonify({'message': 'Nothing was changed.'})
-        
+
     # Check if first name or last name has been changed
     if first != user.first:
         user.first = first
     if last != user.last:
         user.last = last
-        
+
     db.session.commit()
     return jsonify({'message': 'Profile updated successfully!'})
-       
-    
+
+
 @app.route('/api/users', methods=['GET'])
 def get_all_users():
     users = UserModel.query.all()
     user_list = [user.serialize() for user in users]
     return jsonify(user_list)
-    
+
 
 @app.route('/api/users/<int:id>', methods=['GET'])
 def get_user_by_id(id):
@@ -172,7 +182,7 @@ def get_user_by_id(id):
     if user:
         return jsonify(user.serialize())
     else:
-        return jsonify({'error': 'User not found by id', 'message':id}), 404
+        return jsonify({'error': 'User not found by id', 'message': id}), 404
 
 
 ################ POST MODEL RELATED ROUTES ###############
@@ -187,16 +197,17 @@ def create_new_post():
         content = data['content']
         likes = 0
         label = data['label']
-        
-        new_post = PostModel(author_id=author_id, author_name=author_name, title=title, content=content, likes=likes, label=label)
+
+        new_post = PostModel(author_id=author_id, author_name=author_name,
+                             title=title, content=content, likes=likes, label=label)
         db.session.add(new_post)
         db.session.commit()
-        
+
         return jsonify({'message': 'Post was added successfully', 'post': new_post.serialize()}), 200
     else:
         return jsonify({'error': 'User does not exist to create new post'}), 404
-        
-            
+
+
 @app.route('/api/posts', methods=['GET'])
 def get_all_posts():
     label = request.args.get('label')
@@ -204,11 +215,12 @@ def get_all_posts():
         posts = PostModel.query.filter_by(label=label).all()
     else:
         posts = PostModel.query.all()
-        
+
     post_list = [post.serialize() for post in posts]
-    sorted_posts = sorted(post_list, key=lambda x: x['created_at'], reverse=True)
+    sorted_posts = sorted(
+        post_list, key=lambda x: x['created_at'], reverse=True)
     return jsonify(sorted_posts)
-    
+
 
 @app.route('/api/user-posts', methods=['GET'])
 def get_user_posts():
@@ -216,11 +228,12 @@ def get_user_posts():
     if user_id:
         posts = PostModel.query.filter_by(author_id=user_id)
         post_list = [post.serialize() for post in posts]
-            
-        sorted_posts = sorted(post_list, key=lambda x: x['created_at'], reverse=True)
+
+        sorted_posts = sorted(
+            post_list, key=lambda x: x['created_at'], reverse=True)
         return jsonify(sorted_posts)
     else:
-        return jsonify({'error':'User not found to display their posts'})
+        return jsonify({'error': 'User not found to display their posts'})
 
 
 @app.route('/api/posts/<int:post_id>', methods=['GET'])
@@ -229,37 +242,37 @@ def get_post_by_id(post_id):
     if post:
         return jsonify(post.serialize())
     else:
-        return jsonify({'error': 'Post not found by post_id', 'message':id}), 404
+        return jsonify({'error': 'Post not found by post_id', 'message': id}), 404
 
 
-#liking a post
+# liking a post
 @app.route('/api/posts/<int:post_id>/like', methods=['POST'])
 def like_post(post_id):
     user_id = get_current_user_id()
     like = Like.query.filter_by(post_id=post_id, user_id=user_id).first()
-    
+
     if like:
         # If the user has already liked the post before, remove the like from the database
         db.session.delete(like)
         db.session.commit()
-        
+
         # Decrement the number of likes for that post
         post = PostModel.query.get(post_id)
         post.likes = Like.query.filter_by(post_id=post_id).count()
         db.session.commit()
-    
+
         return jsonify({'success': 'unliked'})
     else:
         # If the user has not liked the post before, add a new like entry to the database
         like = Like(post_id=post_id, user_id=user_id)
         db.session.add(like)
         db.session.commit()
-        
+
         # Increment the number of likes for that post
         post = PostModel.query.get(post_id)
         post.likes = Like.query.filter_by(post_id=post_id).count()
         db.session.commit()
-        
+
         return jsonify({'success': 'liked'})
 
 
@@ -270,14 +283,14 @@ def get_post_likes(post_id):
     return jsonify(like_list)
 
 
-#comment on post
-@app.route('/api/posts/<int:post_id>/comments', methods=['GET','POST'])
+# comment on post
+@app.route('/api/posts/<int:post_id>/comments', methods=['GET', 'POST'])
 def comments(post_id):
     if request.method == 'GET':
         comments = Comment.query.filter_by(post_id=post_id).all()
         comments_list = [comment.serialize() for comment in comments]
         return jsonify(comments_list)
-    
+
     elif request.method == 'POST':
         data = get_data()
         user = get_current_user()
@@ -285,25 +298,27 @@ def comments(post_id):
             author_id = user.id
             author_name = user.get_full_name()
             body = data['body']
-            
-            comment = Comment(post_id= post_id, author_id=author_id, author_name=author_name, body=body)
+
+            comment = Comment(post_id=post_id, author_id=author_id,
+                              author_name=author_name, body=body)
             db.session.add(comment)
             db.session.commit()
             return jsonify(comment.serialize()), 200
         else:
             return jsonify({'error': 'User does not exist to comment'}), 404
-    
-  
-#delete post
+
+
+# delete post
 @app.route('/api/delete-post/<int:post_id>', methods=["DELETE"])
 def delete_post(post_id):
     post = PostModel.query.filter_by(id=post_id).first()
     db.session.delete(post)
     db.session.commit()
- 
+
     return jsonify("Post was deleted"), 200
 
 
 # running the server
 if __name__ == '__main__':
-    app.run(host='localhost', port=5000, debug=True) # to allow for debugging and auto-reload
+    # to allow for debugging and auto-reload
+    app.run(host='localhost', port=5000, debug=True)
