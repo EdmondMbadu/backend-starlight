@@ -59,7 +59,7 @@ def login():
         return jsonify({'error': 'Invalid email or password.'}), 401
 
 
-@app.route('/')
+@app.route('/', methods=['GET'])
 def home():
     return "Dummy text"
 
