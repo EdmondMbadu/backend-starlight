@@ -1,7 +1,8 @@
 # app.py
 import os
+from flask_session import Session
 from flask import Flask, flash, g, jsonify, redirect, render_template, request, session
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 from flask_login import current_user, login_required, logout_user
 from models import db, login, UserModel, PostModel, Like, Comment
 from flask_migrate import Migrate
@@ -15,6 +16,8 @@ app.config['JWT_SECRET_KEY'] = 's3cr3!#&7-21jhF'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///starlight.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+
+Session(app)
 CORS(app)
 
 db.init_app(app)
